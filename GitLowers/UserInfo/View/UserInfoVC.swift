@@ -22,6 +22,9 @@ class UserInfoVC: UIViewController {
     private var dateLabel = GLBodyLabel(textAlignment: .center)
     private var mainStack = UIStackView()
     
+    private var topView: UserInfoView!
+    private var bottomView: UserInfoView!
+    
     
     init(username: String) {
         super.init(nibName: nil, bundle: nil)
@@ -37,7 +40,7 @@ class UserInfoVC: UIViewController {
         
         setNavigationBar()
         configure()
-        configureUserInfoView()
+        configureStackView()
         layout()
     }
     
@@ -63,17 +66,21 @@ class UserInfoVC: UIViewController {
         Task {
             let user = try await networkManager.getUserInfo(forUsername: username)
             setUserInfo(forUser: user)
+            configureUserInfoView(forUser: user)
         }
     }
     
     
-    private func configureUserInfoView() {
+    private func configureStackView() {
         mainStack.axis = .vertical
         mainStack.spacing = GlobalConstants.padding16
         view.addSubview(mainStack)
-        
-        let topView = UserInfoView()
-        let bottomView = UserInfoView()
+    }
+    
+    
+    private func configureUserInfoView(forUser user: UserInfoModel) {
+        topView = UserInfoView(user: user)
+        bottomView = UserInfoView(user: user)
         
         mainStack.addArrangedSubview(topView)
         mainStack.addArrangedSubview(bottomView)

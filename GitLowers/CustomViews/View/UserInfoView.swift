@@ -10,8 +10,10 @@ import SnapKit
 
 class UserInfoView: UIView {
     
-    init() {
+    init(user: UserInfoModel) {
         super.init(frame: .zero)
+        
+        print(user)
         
         configure()
     }
