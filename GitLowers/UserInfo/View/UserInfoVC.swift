@@ -8,6 +8,10 @@
 import UIKit
 import SnapKit
 
+protocol UserInfoVCDelegate: AnyObject {
+    func didRequestFollowers(for username: String)
+}
+
 class UserInfoVC: UIViewController {
     
     var username: String!
@@ -20,10 +24,11 @@ class UserInfoVC: UIViewController {
     private var locationLabel = GLBodyLabel(textAlignment: .left)
     private var bioLabel = GLBodyLabel(textAlignment: .left)
     private var dateLabel = GLBodyLabel(textAlignment: .center)
-    private var mainStack = UIStackView()
     
-    private var topView: UserInfoView!
-    private var bottomView: UserInfoView!
+    private var itemViewOne = UIView()
+    private var itemViewTwo = UIView()
+    
+    weak var delegate: UserInfoVCDelegate!
     
     
     init(username: String) {
@@ -40,7 +45,6 @@ class UserInfoVC: UIViewController {
         
         setNavigationBar()
         configure()
-        configureStackView()
         layout()
     }
     
@@ -71,19 +75,15 @@ class UserInfoVC: UIViewController {
     }
     
     
-    private func configureStackView() {
-        mainStack.axis = .vertical
-        mainStack.spacing = GlobalConstants.padding16
-        view.addSubview(mainStack)
-    }
-    
-    
     private func configureUserInfoView(forUser user: UserInfoModel) {
-        topView = UserInfoView(user: user)
-        bottomView = UserInfoView(user: user)
+        let repoView = RepoItemView(user: user)
+        repoView.delegate = self
         
-        mainStack.addArrangedSubview(topView)
-        mainStack.addArrangedSubview(bottomView)
+        let followerView = FollowerItemView(user: user)
+        followerView.delegate = self
+        
+        self.add(childVC: repoView, to: itemViewOne)
+        self.add(childVC: followerView, to: itemViewTwo)
     }
     
     
@@ -98,7 +98,7 @@ class UserInfoVC: UIViewController {
     
     
     private func layout() {
-        [profileImageView, loginLabel, nameLabel, locationImageView, locationLabel, bioLabel, dateLabel].forEach {
+        [profileImageView, loginLabel, nameLabel, locationImageView, locationLabel, bioLabel, itemViewOne, itemViewTwo, dateLabel].forEach {
             view.addSubview($0)
         }
         
@@ -140,17 +140,33 @@ class UserInfoVC: UIViewController {
             $0.height.equalTo(90)
         }
         
-        mainStack.snp.makeConstraints {
+        itemViewOne.snp.makeConstraints {
             $0.top.equalTo(bioLabel.snp.bottom).offset(GlobalConstants.padding16)
             $0.leading.equalTo(view.snp.leading).offset(GlobalConstants.padding16)
             $0.trailing.equalTo(view.snp.trailing).offset(-GlobalConstants.padding16)
+            $0.height.equalTo(140)
+        }
+        
+        itemViewTwo.snp.makeConstraints {
+            $0.top.equalTo(itemViewOne.snp.bottom).offset(GlobalConstants.padding16)
+            $0.leading.equalTo(view.snp.leading).offset(GlobalConstants.padding16)
+            $0.trailing.equalTo(view.snp.trailing).offset(-GlobalConstants.padding16)
+            $0.height.equalTo(140)
         }
         
         dateLabel.snp.makeConstraints {
-            $0.top.equalTo(mainStack.snp.bottom).offset(GlobalConstants.padding16)
+            $0.top.equalTo(itemViewTwo.snp.bottom).offset(GlobalConstants.padding16)
             $0.leading.equalTo(view.snp.leading).offset(GlobalConstants.padding16)
             $0.trailing.equalTo(view.snp.trailing).offset(-GlobalConstants.padding16)
         }
+    }
+    
+    
+    private func add(childVC: UIViewController, to containerView: UIView) {
+        addChild(childVC)
+        containerView.addSubview(childVC.view)
+        childVC.view.frame = containerView.bounds
+        childVC.didMove(toParent: self)
     }
     
     
@@ -164,5 +180,25 @@ class UserInfoVC: UIViewController {
 extension UserInfoVC {
     @objc private func closeButtonTapped() {
         dismiss(animated: true)
+    }
+}
+
+
+extension UserInfoVC: ItemInfoDelegate {
+    func didTapProfile(for user: UserInfoModel) {
+        guard let url = URL(string: user.htmlUrl) else {
+            return
+        }
+        presentSafariVC(with: url)
+    }
+    
+    func didTapFollowers(for user: UserInfoModel) {
+        self.dismiss(animated: true)
+        guard user.followers != 0 else {
+            print("no followers")
+            return
+        }
+        
+        delegate.didRequestFollowers(for: user.login)
     }
 }

@@ -12,7 +12,7 @@ struct GlobalConstants {
     static let padding16: CGFloat = 16
     static let padding25: CGFloat = 25
     
-    static let defaultHeight: CGFloat = 60
+    static let defaultHeight: CGFloat = 44
 }
 
 struct GlobalImages {

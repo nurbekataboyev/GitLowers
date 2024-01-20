@@ -80,14 +80,14 @@ class SearchVC: UIViewController {
             $0.top.equalTo(logoImageView.snp.bottom).offset(60)
             $0.leading.equalTo(view.snp.leading).offset(GlobalConstants.padding25)
             $0.trailing.equalTo(view.snp.trailing).offset(-GlobalConstants.padding25)
-            $0.height.equalTo(GlobalConstants.defaultHeight)
+            $0.height.equalTo(60)
         }
         
         actionButton.snp.makeConstraints {
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-50)
             $0.leading.equalTo(view.snp.leading).offset(GlobalConstants.padding25)
             $0.trailing.equalTo(view.snp.trailing).offset(-GlobalConstants.padding25)
-            $0.height.equalTo(GlobalConstants.defaultHeight)
+            $0.height.equalTo(50)
         }
     }
     

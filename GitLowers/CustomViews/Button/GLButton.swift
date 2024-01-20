@@ -9,19 +9,31 @@ import UIKit
 
 class GLButton: UIButton {
     
-    init(backgroundColor: UIColor, title: String) {
-        super.init(frame: .zero)
-        
-        setTitle(title, for: .normal)
-        self.backgroundColor = backgroundColor
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         
         configure()
     }
     
     
+    convenience init(backgroundColor: UIColor, title: String) {
+        self.init(frame: .zero)
+        
+        setTitle(title, for: .normal)
+        self.backgroundColor = backgroundColor
+    }
+    
+    
+    public func set(backgroundColor: UIColor, title: String) {
+        self.backgroundColor = backgroundColor
+        setTitle(title, for: .normal)
+    }
+    
+    
     private func configure() {
         layer.cornerRadius = 10
-        titleLabel?.font = .systemFont(ofSize: 20, weight: .semibold)
+        titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
     }
     
     

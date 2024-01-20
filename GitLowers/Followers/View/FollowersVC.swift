@@ -18,6 +18,7 @@ class FollowersVC: UIViewController {
     private var isLoadingFollowers: Bool = false
     private var hasMoreFollowers: Bool = true
     
+    private var searchController = UISearchController()
     private var collectionView: UICollectionView!
     private var dataSource: UICollectionViewDiffableDataSource<Section, FollowersModel>!
     
@@ -121,12 +122,12 @@ class FollowersVC: UIViewController {
     
     
     private func configureSearchController() {
-        let searchController = UISearchController()
         searchController.searchResultsUpdater = self
         searchController.searchBar.delegate = self
         searchController.searchBar.placeholder = "Search for a username"
         searchController.searchBar.autocapitalizationType = .none
         searchController.searchBar.autocorrectionType = .no
+        searchController.definesPresentationContext = true
         navigationItem.searchController = searchController
     }
     
@@ -169,8 +170,13 @@ extension FollowersVC: UICollectionViewDelegate {
             selectedUser = followers[indexPath.row]
         }
         
-        let destinationVC = UINavigationController(rootViewController: UserInfoVC(username: selectedUser.login))
-        present(destinationVC, animated: true)
+        let destinationVC = UserInfoVC(username: selectedUser.login)
+        destinationVC.delegate = self
+        present(UINavigationController(rootViewController: destinationVC), animated: true)
+        
+        isSearching = false
+        searchController.searchBar.resignFirstResponder()
+        searchController.searchBar.text = nil
     }
     
     
@@ -181,6 +187,20 @@ extension FollowersVC: UICollectionViewDelegate {
         guard lastIndex == indexPath, hasMoreFollowers, !isLoadingFollowers else { return }
         
         page += 1
+        getFollowers(forUser: username, page: page)
+    }
+}
+
+
+extension FollowersVC: UserInfoVCDelegate {
+    func didRequestFollowers(for username: String) {
+        self.username = username
+        title = username
+        page = 1
+        followers.removeAll()
+        filteredFollowers.removeAll()
+        collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: true)
+        
         getFollowers(forUser: username, page: page)
     }
 }
