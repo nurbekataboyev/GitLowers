@@ -11,4 +11,6 @@ enum GLError: String, Error {
     case invalidUsername = "Invalid username"
     case invalidResponse = "Invalid response"
     case invalidData = "Invalid data"
+    case unableToFavorite = "Unable to Favorite"
+    case alreadyInFavorites = "Already in Favorites"
 }

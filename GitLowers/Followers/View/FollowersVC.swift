@@ -10,6 +10,7 @@ import UIKit
 class FollowersVC: UIViewController {
     
     private let networkManager = NetworkManager.shared
+    private let persistenceManager = PersistenceManager.shared
     var username: String!
     private var page: Int = 1
     private var followers: [FollowersModel] = []
@@ -34,6 +35,9 @@ class FollowersVC: UIViewController {
         navigationController?.setNavigationBarHidden(false, animated: false)
         navigationController?.navigationBar.prefersLargeTitles = true
         title = username
+        
+        let favoriteButton = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(favoriteTapped))
+        navigationItem.rightBarButtonItem = favoriteButton
     }
     
     
@@ -136,6 +140,38 @@ class FollowersVC: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+}
+
+
+extension FollowersVC {
+    @objc private func favoriteTapped() {
+        showLoadingScreen()
+        
+        Task {
+            do {
+                let user = try await networkManager.getUserInfo(forUsername: username)
+                addUserToFavorites(user: user)
+            } catch {
+                print(error.localizedDescription)
+            }
+            
+            dismissLoadingScreen()
+        }
+    }
+    
+    
+    private func addUserToFavorites(user: UserInfoModel) {
+        let favorite = FollowersModel(login: user.login, avatarUrl: user.avatarUrl)
+        
+        persistenceManager.updateWith(favorite: favorite, actionType: .add) { error in
+            guard error != nil else {
+                print("Successfully added to favorites")
+                return
+            }
+            
+            print("Something went wrong\nCouldn't add to favorite")
+        }
+    }
 }
 
 
